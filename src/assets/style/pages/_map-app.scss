@@ -1,0 +1,26 @@
+.map-app {
+    .container {
+        display: flex;
+        height: calc(100vh - 61px - 61px - 100px);
+        gap: 10px;
+        > div > .map-form {
+            display: flex;
+            flex-direction: column;
+            form {
+                > div {
+                    display: flex;
+                    input {
+                        margin: 0 10px;
+                        padding: 5px;
+                    }
+                    label {
+                        margin-inline-end: 15px;
+                    }
+                }
+            }
+        }
+        .myMap {
+            flex-grow: 1;
+        }
+    }
+}
