@@ -1,0 +1,12 @@
+.user-details {
+    display: flex;
+    gap: 15px;
+    
+    img {
+        border: 1px solid black;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        align-self: center;
+    }
+}

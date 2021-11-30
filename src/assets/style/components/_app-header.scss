@@ -1,0 +1,151 @@
+header {
+    background-color: $bg-main;
+    background: linear-gradient($bg-sec, $bg-main);
+    box-shadow: inset 0 -5px 12px 0px #333, 0px 5px 12px #a2a2a2;
+    margin-bottom: 20px;
+
+    .screen {
+        &.on {
+            transition: 0.4s;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            bottom: 0;
+            background-color: #333;
+            opacity: 0.7;
+            z-index: 1;
+            visibility: visible;
+        }
+        opacity: 0;
+        position: fixed;
+        top: 0;
+        left: 0;
+        transition: 0.4s;
+        width: 100vw;
+        height: 100vh;
+        visibility: hidden;
+    }
+    .header {
+        z-index: 10;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        height: 80px;
+        .logo {
+            font-size: 2rem;
+            font-weight: 600;
+            letter-spacing: 0.3rem;
+            text-transform: uppercase;
+            // color: $clr-white;
+            color: $bg-sec;
+            text-shadow: 0 0 10px #515308;
+        }
+
+        .theme {
+            &::before {
+                background: url("https://cdn3.iconfinder.com/data/icons/meteocons/512/moon-black-512.png");
+                content: "";
+                height: 3rem;
+                width: 2rem;
+                position: absolute;
+                top: 1rem;
+                background-size: 3rem;
+                background-repeat: no-repeat;
+                transform: translateX(calc(-100% - 10px));
+            }
+            &.dark {
+                &::before {
+                    background: url("data:image/png;base64,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");
+                    content: "";
+                    height: 2rem;
+                    width: 2rem;
+                    position: absolute;
+                    top: 1rem;
+                    background-size: 2rem;
+                    background-repeat: no-repeat;
+                    transform: translateX(calc(-100% - 10px));
+                }
+            }
+        }
+
+        nav {
+            display: flex;
+            gap: 25px;
+
+            @include for-mobile-layout {
+                flex-direction: column;
+                position: fixed;
+                right: -40%;
+                width: 40%;
+                height: calc(100% - 80px);
+                transition: 0.4s;
+                top: 80px;
+                padding: 25px 20px;
+                background-color: $bg-sec;
+                z-index: 20;
+                &.open {
+                    right: 0;
+                    transition: 0.4s;
+                }
+                a {
+                    &:first-of-type::before {
+                        display: none;
+                    }
+                }
+            }
+
+            a {
+                text-decoration: none;
+                color: $clr-white;
+                font-weight: bold;
+                &:hover {
+                    color: $clr-black;
+                    &:first-of-type::before {
+                        filter: invert(0);
+                    }
+                }
+                &.active {
+                    font-weight: 600;
+                    color: $clr-black;
+                    &:first-of-type::before {
+                        filter: invert(0);
+                    }
+                }
+
+                &:first-of-type::before {
+                    content: " ";
+                    background: url("https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/Home-icon.svg/2048px-Home-icon.svg.png");
+                    height: 1rem;
+                    width: 1rem;
+                    position: absolute;
+                    background-size: 1rem;
+                    background-repeat: no-repeat;
+                    transform: translateX(calc(-100% - 10px));
+                    filter: invert(1);
+                }
+            }
+        }
+        .hamburger {
+            display: none;
+            cursor: pointer;
+            font-size: 2rem;
+            color: $clr-white;
+            &::before {
+                content: "☰";
+            }
+
+            &.open {
+                &::before {
+                    content: "X";
+                }
+            }
+            &:hover {
+                color: $bg-sec;
+            }
+            @include for-mobile-layout {
+                display: inline-block;
+            }
+        }
+    }
+}
