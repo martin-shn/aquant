@@ -3,7 +3,8 @@ import { useEffect, useRef, useState } from 'react';
 const scriptUrl = 'http://www.bing.com/api/maps/mapcontrol?callback=GetMap&key=AmSkA2y44H3WY8YmJ2PgjzsdYqgfjppdFpiwsGVTTJYwmq9oBD0-PTzk3iSGHXmv';
 
 export const MapApp = () => {
-    const initCenter = [31.771959, 35.217018];
+    const [initCenter, setInitCenter] = useState([31.771959, 35.217018]);
+    var zoom = 6;
     const [coords, setCoords] = useState([]);
     const [form, setForm] = useState({
         addBy: 'add-coords',
@@ -34,13 +35,12 @@ export const MapApp = () => {
 
     const getMap = () => {
         const Microsoft = window.Microsoft;
-        var map = new Microsoft.Maps.Map('#myMap', { center: new Microsoft.Maps.Location(initCenter[0], initCenter[1]), zoom: 5 });
+        var map = new Microsoft.Maps.Map('#myMap', { center: new Microsoft.Maps.Location(initCenter[0], initCenter[1]), zoom });
 
-        var center = map.getCenter();
-        console.log(coords);
+        // const center = map.getCenter();
         var exteriorRing = coords.map((currCoord) => new Microsoft.Maps.Location(currCoord[0], currCoord[1])) || [];
-        exteriorRing.unshift(center);
-        if (exteriorRing.length > 1) exteriorRing.push(center);
+        // exteriorRing.unshift(center);
+        // if (exteriorRing.length > 1) exteriorRing.push(center);
 
         //Create a polygon
         var polygon = new Microsoft.Maps.Polygon(exteriorRing, {
@@ -51,6 +51,27 @@ export const MapApp = () => {
 
         //Add the polygon to map
         map.entities.push(polygon);
+    };
+
+    const addPlace = (place) => {
+        const Microsoft = window.Microsoft
+        var map = new Microsoft.Maps.Map('#myMap', { center: new Microsoft.Maps.Location(initCenter[0], initCenter[1]), zoom });
+
+        Microsoft.Maps.loadModule('Microsoft.Maps.Search', function () {
+            var searchManager = new Microsoft.Maps.Search.SearchManager(map);
+            var requestOptions = {
+                bounds: map.getBounds(),
+                where: place,
+                callback: function (answer, userData) {
+                    setInitCenter([answer.results[0].bestView.center.latitude, answer.results[0].bestView.center.longitude])
+                    const res = new Microsoft.Maps.Pushpin(answer.results[0].location);
+                    const currCoords = [...coords];
+                    currCoords.push([res.geometry.y, res.geometry.x]);
+                    setCoords(currCoords);
+                },
+            };
+            searchManager.geocode(requestOptions);
+        });
     };
 
     const handleChange = ({ target }) => {
@@ -77,18 +98,21 @@ export const MapApp = () => {
         ev.preventDefault();
         if (form.addBy === 'add-place') {
             console.log('Adding: Place:', form.place);
-            const currCoords = [...coords];
-            currCoords.push([form.place]);
-            // setCoords(currCoords);
+            addPlace(form.place)
         } else {
             const currCoords = [...coords];
             currCoords.push([form.lat, form.lng]);
             currCoords.sort((a, b) => a[0] - b[0]);
             setCoords(currCoords);
         }
-        setForm({ ...form, lat: '', lng: '', place:'' });
+        setForm({ ...form, lat: '', lng: '', place: '' });
         elRef.current.focus();
     };
+
+    const clearMap = (ev) => {
+        ev.preventDefault()
+        setCoords([])
+    }
 
     return (
         <main className='map-app main-layout'>
@@ -137,13 +161,16 @@ export const MapApp = () => {
                         {form.addBy === 'add-place' && (
                             <div>
                                 <div>
-                                    <label htmlFor='place' className='place'>Place:</label>
+                                    <label htmlFor='place' className='place'>
+                                        Place:
+                                    </label>
                                     <input id='place' ref={elRef} type='text' value={form.place} name='place' onChange={handleChange} autoFocus />
                                 </div>
                             </div>
                         )}
 
                         <button>Submit Coords</button>
+                        <button onClick={clearMap}>Clear Coords</button>
                     </form>
                 </div>
                 <div id='myMap' className='myMap'></div>
