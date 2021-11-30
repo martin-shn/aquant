@@ -1,9 +1,10 @@
-import { ReactBingmaps } from 'react-bingmaps';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+
+const scriptUrl = 'http://www.bing.com/api/maps/mapcontrol?callback=GetMap&key=AmSkA2y44H3WY8YmJ2PgjzsdYqgfjppdFpiwsGVTTJYwmq9oBD0-PTzk3iSGHXmv';
 
 export const MapApp = () => {
-    const center = [31.771959, 35.217018];
-    const [coords, setCoords] = useState();
+    const initCenter = [31.771959, 35.217018];
+    const [coords, setCoords] = useState([]);
     const [form, setForm] = useState({
         addBy: 'add-coords',
         lat: '',
@@ -11,42 +12,45 @@ export const MapApp = () => {
         place: 'Jerusalem',
     });
 
-    // useEffect(() => {
-    //     // getMap();
-    //     setCoords({
-    //         a:[center,[30,30],[31,34], center],
-    //           "polygonStyle" : {
-    //             fillColor: 'rgba(161,224,255,0.4)',
-    //             strokeColor: '#a495b2',
-    //             strokeThickness: 2
-    //           }
+    const elRef = useRef();
 
-    //       });
-    //     }, [])
+    useEffect(() => {
+        loadScript(scriptUrl);
+    }, []);
 
-    // const getMap = () => {
-    //     var map = new Microsoft.Maps.Map('#myMap', {});
+    useEffect(() => {
+        if (window.Microsoft) getMap();
+    }, [coords]);
 
-    //     var center = map.getCenter();
+    const loadScript = async (src) => {
+        var tag = document.createElement('script');
+        tag.async = false;
+        tag.defer = false;
+        tag.src = src;
+        var body = document.getElementsByTagName('body')[0];
+        body.appendChild(tag);
+        setTimeout(() => getMap(), 4000);
+    };
 
-    //     //Create array of locations to form a ring.
-    //     var exteriorRing = [
-    //         center,
-    //         new Microsoft.Maps.Location(center.latitude - 0.5, center.longitude - 1),
-    //         new Microsoft.Maps.Location(center.latitude - 0.5, center.longitude + 1),
-    //         center,
-    //     ];
+    const getMap = () => {
+        const Microsoft = window.Microsoft;
+        var map = new Microsoft.Maps.Map('#myMap', { center: new Microsoft.Maps.Location(initCenter[0], initCenter[1]), zoom: 5 });
 
-    //     //Create a polygon
-    //     var polygon = new Microsoft.Maps.Polygon(exteriorRing, {
-    //         fillColor: 'rgba(0, 255, 0, 0.5)',
-    //         strokeColor: 'red',
-    //         strokeThickness: 2,
-    //     });
+        var center = map.getCenter();
+        var exteriorRing = coords.map((currCoord) => new Microsoft.Maps.Location(currCoord[0], currCoord[1])) || [];
+        exteriorRing.unshift(center);
+        if (exteriorRing.length > 1) exteriorRing.push(center);
 
-    //     //Add the polygon to map
-    //     map.entities.push(polygon);
-    // };
+        //Create a polygon
+        var polygon = new Microsoft.Maps.Polygon(exteriorRing, {
+            fillColor: 'rgba(0, 255, 0, 0.5)',
+            strokeColor: 'red',
+            strokeThickness: 2,
+        });
+
+        //Add the polygon to map
+        map.entities.push(polygon);
+    };
 
     const handleChange = ({ target }) => {
         switch (target.name) {
@@ -70,7 +74,16 @@ export const MapApp = () => {
 
     const onSubmitCoords = (ev) => {
         ev.preventDefault();
-        form.addBy === 'add-place' ? console.log('Adding: Place:', form.place) : console.log('Adding: Lat:', form.lat, 'Lng:', form.lng);
+        if (form.addBy === 'add-place') {
+            console.log('Adding: Place:', form.place);
+        } else {
+            const currCoords = [...coords];
+            currCoords.push([form.lat, form.lng]);
+            currCoords.sort((a, b) => a[0] - b[0]);
+            setCoords(currCoords);
+        }
+        setForm({ ...form, lat: '', lng: '' });
+        elRef.current.focus();
     };
 
     return (
@@ -108,7 +121,7 @@ export const MapApp = () => {
                             <div>
                                 <div>
                                     <label htmlFor='lng'>Lng:</label>
-                                    <input id='lng' type='number' value={form.lng} name='byLng' onChange={handleChange} />
+                                    <input id='lng' ref={elRef} type='number' value={form.lng} name='byLng' onChange={handleChange} autoFocus />
                                 </div>
                                 <div>
                                     <label htmlFor='lat'>Lat:</label>
@@ -120,8 +133,8 @@ export const MapApp = () => {
                         {form.addBy === 'add-place' && (
                             <div>
                                 <div>
-                                    <label htmlFor='place'>Place:</label>
-                                    <input id='place' type='text' value={form.place} name='place' onChange={handleChange} />
+                                    <label htmlFor='place' className='place'>Place:</label>
+                                    <input id='place' type='text' value={form.place} name='place' onChange={handleChange} autoFocus />
                                 </div>
                             </div>
                         )}
@@ -129,23 +142,7 @@ export const MapApp = () => {
                         <button>Submit Coords</button>
                     </form>
                 </div>
-                <div className='myMap'>
-                    <ReactBingmaps
-                        bingmapKey='AmSkA2y44H3WY8YmJ2PgjzsdYqgfjppdFpiwsGVTTJYwmq9oBD0-PTzk3iSGHXmv'
-                        center={center}
-                        boundary={{
-                            'location': ['Jerusalem'],
-                            'option': {
-                                entityType: 'PopulatedPlace',
-                            },
-                            'polygonStyle': {
-                                fillColor: 'rgba(161,224,255,0.4)',
-                                strokeColor: '#a495b2',
-                                strokeThickness: 2,
-                            },
-                        }}
-                    ></ReactBingmaps>
-                </div>
+                <div id='myMap' className='myMap'></div>
             </section>
         </main>
     );

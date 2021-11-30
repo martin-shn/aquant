@@ -3,18 +3,38 @@
         display: flex;
         height: calc(100vh - 61px - 61px - 100px);
         gap: 10px;
-        > div > .map-form {
+        & > .map-form {
             display: flex;
             flex-direction: column;
             form {
-                > div {
+                display: flex;
+                flex-direction: column;
+                gap: 15px;
+                & > div {
                     display: flex;
+                    gap: 10px;
                     input {
-                        margin: 0 10px;
                         padding: 5px;
                     }
                     label {
                         margin-inline-end: 15px;
+                    }
+                }
+                & > div:last-of-type {
+                    flex-direction: column;
+                    & > div {
+                        display: flex;
+                        align-items: center;
+                        label{
+                            width: 3ch;
+                            &.place{
+                                width: unset;
+                                margin-right: 5px;
+                            }
+                        }
+                        input{
+                            flex-grow: 1;
+                        }
                     }
                 }
             }
