@@ -37,6 +37,7 @@ export const MapApp = () => {
         var map = new Microsoft.Maps.Map('#myMap', { center: new Microsoft.Maps.Location(initCenter[0], initCenter[1]), zoom: 5 });
 
         var center = map.getCenter();
+        console.log(coords);
         var exteriorRing = coords.map((currCoord) => new Microsoft.Maps.Location(currCoord[0], currCoord[1])) || [];
         exteriorRing.unshift(center);
         if (exteriorRing.length > 1) exteriorRing.push(center);
@@ -76,13 +77,16 @@ export const MapApp = () => {
         ev.preventDefault();
         if (form.addBy === 'add-place') {
             console.log('Adding: Place:', form.place);
+            const currCoords = [...coords];
+            currCoords.push([form.place]);
+            // setCoords(currCoords);
         } else {
             const currCoords = [...coords];
             currCoords.push([form.lat, form.lng]);
             currCoords.sort((a, b) => a[0] - b[0]);
             setCoords(currCoords);
         }
-        setForm({ ...form, lat: '', lng: '' });
+        setForm({ ...form, lat: '', lng: '', place:'' });
         elRef.current.focus();
     };
 
@@ -134,7 +138,7 @@ export const MapApp = () => {
                             <div>
                                 <div>
                                     <label htmlFor='place' className='place'>Place:</label>
-                                    <input id='place' type='text' value={form.place} name='place' onChange={handleChange} autoFocus />
+                                    <input id='place' ref={elRef} type='text' value={form.place} name='place' onChange={handleChange} autoFocus />
                                 </div>
                             </div>
                         )}
